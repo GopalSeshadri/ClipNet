@@ -1,3 +1,7 @@
+"""
+@author: Agastya Teja Anumanchi
+"""
+
 import numpy as np
 import json
 

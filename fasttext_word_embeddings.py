@@ -1,3 +1,7 @@
+"""
+@author: Agastya Teja Anumanchi
+"""
+
 import gensim
 import numpy as np
 import pandas as pd
@@ -63,7 +67,6 @@ def load_json(path):
 
             }
         '''
-
         videos = json.load(f)
 
     return videos
@@ -82,13 +85,9 @@ def sentence_to_vector(sentence):
     vector_sentence = []
 
     for each_word in sentence:
-
         cleaned_word = text_preprocess(each_word)
-
         if cleaned_word in model:
-
             vector_sentence.append(model[cleaned_word].tolist())
-
 
     return vector_sentence
 
@@ -134,19 +133,15 @@ def write_output(videos,path):
     ub = (i+1)*1000
 
     while(i<10):
-        print(i)
 
         keys = all_keys[lb:ub]
         video_subset = {}
 
         for key,value in videos.items():
-
             if key in keys:
                 video_subset[key] = value
 
-
         with open(path + str(i+1) + ".json", "w") as f:
-
             json.dump(video_subset, f)
 
         i = i + 1
