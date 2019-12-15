@@ -10,6 +10,18 @@ import json
 
 # Loading frame and caption embeddings
 def load_embedding(file_name, embedding_type):
+    '''
+    This function takes in a file name and embedding type, whether it is a frame or caption.
+    Return a dictionary of that embedding type.
+
+    Parameters:
+    file_name (str) : A file name of the embedding
+    embedding_type (str) : It can either of two values, 'frame' or 'caption'
+
+    Returns:
+    dict : A dictionary of embedding with video id as key
+    '''
+
     if embedding_type == 'frame':
         with open('Embeddings/frame_embeddings/{}'.format(file_name), 'rb') as f:
             return pickle.load(f)
@@ -20,6 +32,17 @@ def load_embedding(file_name, embedding_type):
         return
 
 def create_pairs(frame_embeddings, caption_embeddings):
+    '''
+    This function takes in frame embeddings and caption emebeddding as dictionary. Returns a list of paired data.
+
+    Parameters:
+    frame_embeddings (dict) : A dictionary of frame embeddings
+    caption_embeddings (dict) : A dictionary of caption embeddings
+
+    Returns:
+    output_list (list) : A list of lists, where each list of structure,
+                         [clip_sentence, clip_frames, clip_captions, video id, timestamp]
+    '''
     output_list = []
 
     for i, video_id in enumerate(caption_embeddings.keys()):
