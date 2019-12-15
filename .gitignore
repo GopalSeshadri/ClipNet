@@ -1,6 +1,7 @@
 /Venv/
 /Data/
 /Model/
+/Paired/
 /Embeddings/
 /assets/
 *.csv
