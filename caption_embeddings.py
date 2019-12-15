@@ -1,196 +1,118 @@
-import gensim
 import numpy as np
-import pandas as pd
 import json
-import string
-from gensim.models import KeyedVectors as KV
 
-# This model file is downloaded from the fasttext webpage: https://fasttext.cc/docs/en/english-vectors.html
-model = KV.load_word2vec_format('Embeddings/Fasttext/wiki-news-300d-1M.vec', binary=False)
-print('Model Loaded')
+video_id_list_valid = np.load('Data/ChosenClasses/video_id_list_valid.pkl', allow_pickle=True)
+video_id_list_train = np.load('Data/ChosenClasses/video_id_list_train.pkl', allow_pickle=True)
 
-def text_preprocess(each_text):
-    '''
-    Helper function for preprocessing the text. Removes punctuations and digits in a text
+def remove_mp4(id_list):
 
-    Parameters :
-    each_text (string) : Takes in word in a sentence
+    for i in range(len(id_list)):
 
-    Returns :
-    output (string): Returns a string
-    '''
+        id_list[i] = id_list[i][:-4]
 
-    punctuations_digits = string.punctuation + string.digits
-    output = each_text.translate(str.maketrans('', '', punctuations_digits)
+    return id_list
 
-    return output
-
-def clean_punctuation(text):
-    '''
-    Helper function for removing punctuations in setence. Replaces punctuations with spaces.
-
-    Parameters :
-    text (string): Takes in a sentence
-
-    Returns:
-    processed (string) : Returns a string
-    '''
-
-    string_punctuations = string.punctuation
-    processed = (text.lower()).translate(str.maketrans(string_punctuations, ' ' * len(string.punctuation)))
-
-    return processed
+val_id_list = remove_mp4(video_id_list_valid)
+train_id_list = remove_mp4(video_id_list_train)
 
 def load_json(path):
     '''
     Helper function to load json file
 
-    Parameters :
-    path (string): Takes in location of json file
-
-    Returns:
-    vidoes (dict) : Returns the loaded json file
     '''
 
     with open(path,"r") as f:
+
         '''
             Json structure: datatype
-            {
-                Videoid: String,
-                Duration: Numeric,
-                Timestamps: List,
-                Sentences: String
+            Videoid: String,
+            Duration: Numeric,
+            Timestamps: List,
+            Sentences: String
 
-            }
         '''
 
         videos = json.load(f)
 
     return videos
 
-def sentence_to_vector(sentence):
-    '''
-    Helper function that takes each caption setence and returns 300 Dim vector
+train_word_embeddings = load_json(path = "Data/Captions/worddump/all_train.json")
+val1_word_embeddings = load_json(path = "Data/Captions/worddump/val_1.json")
+val2_word_embeddings = load_json(path = "Data/Captions/worddump/val_2.json")
+all_keys = list(train_word_embeddings.keys()) + list(val1_word_embeddings.keys()) + list(val2_word_embeddings.keys())
+temp = [i[2:] for i in all_keys]
 
-    Parameters :
-    sentence (string): Takes in each caption as string
+def intersection_ids(all_keys,temp,ids):
 
-    Returns:
-    vector_sentence (list) : Returns the vectorized sentece of 300 Dim in the form of list
-    '''
+    temp_output = []
+    count = 0
 
-    vector_sentence = []
+    for id in ids:
 
-    for each_word in sentence:
+        if id in temp:
 
-        cleaned_word = text_preprocess(each_word)
+            index = temp.index(id)
+            temp_output.append(all_keys[index])
+            count+=1
 
-        if cleaned_word in model:
+    return temp_output
 
-            vector_sentence.append(model[cleaned_word].tolist())
+def create_sentence_embeddings(vectors):
 
+    sentence_embeddings = []
+    for sentence in vectors:
+        #print(len(sentence))
+        #print(len(sentence), len(sentence[0]))
+        sentence_array = np.array(sentence)
+        #print(sentence_array.shape)
+        sentence_array_reduced = np.mean(sentence_array, axis = 0)
+        print(sentence_array_reduced.shape)
 
-    return vector_sentence
-
-
-def gen_caption_vec(captions):
-    '''
-    Helper function that takes each caption setence and returns 300 Dim vector
-
-    Parameters :
-    sentence (string): Takes in each caption as string
-
-    Returns:
-    vector_sentence (list) : Returns the vectorized sentece of 300 Dim in the form of list
-    '''
-
-    vector_caption = []
-
-    for each_caption in captions:
-
-        processed_caption = clean_punctuation(each_caption)
-
-        processed_caption = processed_caption.strip()
-        sentence = processed_caption.split()
-
-        vector_caption.append(sentence_to_vector(sentence))
-
-    return vector_caption
-
-def write_output(videos,path):
-    '''
-    Helper function to write the output to json files
-
-    Parameters:
-    videos (dict),path (string) : Takes in videos dict and path
-
-    Returns:
-    None: We write the output in a particular location
-    '''
-
-    all_keys = list(videos.keys())
-    i = 0
-    lb = i*1000
-    ub = (i+1)*1000
-
-    while(i<10):
-        print(i)
-
-        keys = all_keys[lb:ub]
-        video_subset = {}
-
-        for key,value in videos.items():
-
-            if key in keys:
-                video_subset[key] = value
+        sentence_embeddings.append(sentence_array_reduced.tolist())
+    return sentence_embeddings
 
 
-        with open(path + str(i+1) + ".json", "w") as f:
+train_id_intersection = intersection_ids(all_keys,temp,ids=train_id_list)
+validation_id_intersection = intersection_ids(all_keys,temp,ids=val_id_list)
 
-            json.dump(video_subset, f)
+def word_embeddings(id_list):
+    final_output = {}
 
-        i = i + 1
+    xyz = []
+    for id in id_list:
 
-if __name__ == "__main__":
+        if id in train_word_embeddings.keys():
 
-    videos = load_json(path = "Data/Captions/train.json")
-    for id in videos:
+            final_output[id] = train_word_embeddings[id]
 
-        video = videos[id]
-        captions = video['sentences']
-        caption_vec = gen_caption_vec(captions)
-        video['vectors'] = caption_vec
+        elif id in val1_word_embeddings.keys():
 
-    print('Training Caption Embeddings Complete')
+            final_output[id] = val1_word_embeddings[id]
 
-    with open("Data/Captions/train.json", "w") as f:
+        elif id in val2_word_embeddings.keys():
 
-        json.dump(videos, f)
+            final_output[id] = val2_word_embeddings[id]
 
-    videos = load_json(path = "Data/Captions/val_1.json")
-    for id in videos:
+    return final_output
 
-        video = videos[id]
-        captions = video['sentences']
-        caption_vec = gen_caption_vec(captions)
-        video['vectors'] = caption_vec
+train_embeddings = word_embeddings(id_list=train_id_intersection)
 
-    print('Validation 1 Caption Embeddings Complete')
+val_embeddings = word_embeddings(id_list=validation_id_intersection)
 
-    with open("Data/Captions/val_1.json", "w") as f:
 
-        json.dump(videos, f)
 
-    videos = load_json(path = "Data/Captions/val_2.json")
-    for id in videos:
+for key in train_embeddings.keys():
 
-        video = videos[id]
-        captions = video['sentences']
-        caption_vec = gen_caption_vec(captions)
-        video['vectors'] = caption_vec
+    train_embeddings[key]['vectors'] = create_sentence_embeddings(train_embeddings[key]['vectors'])
 
-    print('Validation 2 Caption Embeddings Complete')
+with open("Embeddings/caption_embeddings/train_embeddings.json", "w") as f:
 
-    with open("Data/Captions/val_2.json", "w") as f:
+        json.dump(train_embeddings, f)
 
-        json.dump(videos, f)
+for key in val_embeddings.keys():
+
+    val_embeddings[key]['vectors'] = create_sentence_embeddings(val_embeddings[key]['vectors'])
+
+with open("Embeddings/caption_embeddings/val_embeddings.json", "w") as f:
+
+        json.dump(val_embeddings, f)
