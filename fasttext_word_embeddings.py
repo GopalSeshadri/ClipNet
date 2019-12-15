@@ -151,46 +151,45 @@ def write_output(videos,path):
 
         i = i + 1
 
-if __name__ == "__main__":
 
-    videos = load_json(path = "Data/Captions/train.json")
-    for id in videos:
+videos = load_json(path = "Data/Captions/train.json")
+for id in videos:
 
-        video = videos[id]
-        captions = video['sentences']
-        caption_vec = gen_caption_vec(captions)
-        video['vectors'] = caption_vec
+    video = videos[id]
+    captions = video['sentences']
+    caption_vec = gen_caption_vec(captions)
+    video['vectors'] = caption_vec
 
-    print('Training Caption Embeddings Complete')
+print('Training Caption Embeddings Complete')
 
-    with open("Data/Captions/train.json", "w") as f:
+with open("Data/Captions/train.json", "w") as f:
 
-        json.dump(videos, f)
+    json.dump(videos, f)
 
-    videos = load_json(path = "Data/Captions/val_1.json")
-    for id in videos:
+videos = load_json(path = "Data/Captions/val_1.json")
+for id in videos:
 
-        video = videos[id]
-        captions = video['sentences']
-        caption_vec = gen_caption_vec(captions)
-        video['vectors'] = caption_vec
+    video = videos[id]
+    captions = video['sentences']
+    caption_vec = gen_caption_vec(captions)
+    video['vectors'] = caption_vec
 
-    print('Validation 1 Caption Embeddings Complete')
+print('Validation 1 Caption Embeddings Complete')
 
-    with open("Data/Captions/val_1.json", "w") as f:
+with open("Data/Captions/val_1.json", "w") as f:
 
-        json.dump(videos, f)
+    json.dump(videos, f)
 
-    videos = load_json(path = "Data/Captions/val_2.json")
-    for id in videos:
+videos = load_json(path = "Data/Captions/val_2.json")
+for id in videos:
 
-        video = videos[id]
-        captions = video['sentences']
-        caption_vec = gen_caption_vec(captions)
-        video['vectors'] = caption_vec
+    video = videos[id]
+    captions = video['sentences']
+    caption_vec = gen_caption_vec(captions)
+    video['vectors'] = caption_vec
 
-    print('Validation 2 Caption Embeddings Complete')
+print('Validation 2 Caption Embeddings Complete')
 
-    with open("Data/Captions/val_2.json", "w") as f:
+with open("Data/Captions/val_2.json", "w") as f:
 
-        json.dump(videos, f)
+    json.dump(videos, f)
