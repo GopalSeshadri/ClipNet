@@ -87,3 +87,16 @@ with open('Paired/train_pair.pickle', 'wb') as f:
 ids = [each[3] for each in train_pair_list]
 print(ids)
 print(len(set(ids)))
+
+val_frame_embedding = load_embedding('feature_dict_valid.pkl', 'frame') # file name might change
+val_caption_embeddings = load_embedding('val_embeddings.json', 'caption')
+
+val_pair_list = create_pairs(val_frame_embedding, val_caption_embeddings)
+print(len(val_pair_list))
+
+with open('Paired/val_pair.pickle', 'wb') as f:
+    pickle.dump(val_pair_list, f, protocol = pickle.HIGHEST_PROTOCOL)
+
+ids = [each[3] for each in val_pair_list]
+print(ids)
+print(len(set(ids)))
