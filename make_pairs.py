@@ -37,7 +37,7 @@ def create_pairs(frame_embeddings, caption_embeddings):
 
     Parameters:
     frame_embeddings (dict) : A dictionary of frame embeddings
-    caption_embeddings (dict) : A dictionary of caption embeddings
+    caption_embeddings (dict) : A dictionary of caption embeddings for each words
 
     Returns:
     output_list (list) : A list of lists, where each list of structure,
@@ -64,7 +64,7 @@ def create_pairs(frame_embeddings, caption_embeddings):
             clip_captions = np.array(vectors[j])
             clip_timestamp = timestamps[j]
             clip_sentence = sentences[j]
-            if clip_frames.shape[0] < 3:
+            if clip_frames.shape[0] < 3 or clip_frames.shape[0] > 50:
                 continue
             output_list.append([clip_sentence, clip_frames, clip_captions, vid, clip_timestamp])
 
@@ -85,7 +85,7 @@ with open('Paired/train_pair.pickle', 'wb') as f:
     pickle.dump(train_pair_list, f, protocol = pickle.HIGHEST_PROTOCOL)
 
 ids = [each[3] for each in train_pair_list]
-print(ids)
+# print(ids)
 print(len(set(ids)))
 
 val_frame_embedding = load_embedding('feature_dict_valid.pkl', 'frame') # file name might change
@@ -98,5 +98,5 @@ with open('Paired/val_pair.pickle', 'wb') as f:
     pickle.dump(val_pair_list, f, protocol = pickle.HIGHEST_PROTOCOL)
 
 ids = [each[3] for each in val_pair_list]
-print(ids)
+# print(ids)
 print(len(set(ids)))
