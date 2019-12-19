@@ -4,23 +4,6 @@ import pickle
 import random
 
 def pad_pairs(pair_list):
-    max_frame_step = max([each[1].shape[0] for each in pair_list])
-    # print(max_frame_step)
-    for idx, each in enumerate(pair_list):
-        pair_list[idx][1] = np.vstack([each[1], np.zeros((max_frame_step - each[1].shape[0], 500))])
-    # print([each[1].shape for each in pair_list])
-    # print([t.shape for t in temp])
-
-    max_caption_step = max([each[2].shape[0] for each in pair_list])
-    # print(max_caption_step)
-
-    for idx, each in enumerate(pair_list):
-        pair_list[idx][2] = np.vstack([each[2], np.zeros((max_caption_step - each[2].shape[0], 300))])
-
-    # print([each[2].shape for each in pair_list])
-    return pair_list
-
-def create_triples(pair_list):
     '''
     Takes in a list of pairs returns a list of tuples
 
@@ -29,14 +12,48 @@ def create_triples(pair_list):
                       [clip_sentence, clip_frames, clip_captions, video id, timestamp]
 
     Returns:
-
+    pair_list (list) : A list of lists, where each list of structure
     '''
+    # max_frame_step = max([each[1].shape[0] for each in pair_list])
+    max_frame_step = 50
+    # print(max_frame_step)
+    for idx, each in enumerate(pair_list):
+        pair_list[idx][1] = np.vstack([each[1], np.zeros((max_frame_step - each[1].shape[0], 500))])
+
+    print([each[1].shape for each in pair_list])
+    # print([t.shape for t in temp])
+
+    # max_caption_step = max([each[2].shape[0] for each in pair_list])
+    max_caption_step = 50
+    # print(max_caption_step)
+
+    for idx, each in enumerate(pair_list):
+        if each[2].shape[0] < 50:
+            pair_list[idx][2] = np.vstack([each[2], np.zeros((max_caption_step - each[2].shape[0], 300))])
+        else:
+            pair_list[idx][2] = each[2][:50, :]
+
+    print([each[2].shape for each in pair_list])
+    return pair_list
+
+def create_triples(pair_list):
+    '''
+    Takes in a list of pairs returns a list of triplets
+
+    Parameters:
+    pair_list (list) : A list of lists, where each list of structure,
+                      [clip_sentence, clip_frames, clip_captions, video id, timestamp]
+
+    Returns:
+    triple_list (list) : A list of triplets [anchor, positive, negative]
+    '''
+    
     triple_list = []
     for i, each in enumerate(pair_list):
         anchor = each[2]
         positive = each[1]
         temp = pair_list[: i] + pair_list[i + 1 :]
-        indices = random.sample(range(0, len(temp)), 40)
+        indices = random.sample(range(0, len(temp)), 250)
         for j in indices:
             negative = temp[j][1]
             triple_list.append([anchor, positive, negative])

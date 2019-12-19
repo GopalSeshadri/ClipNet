@@ -4,6 +4,7 @@
 /Paired/
 /Embeddings/
 /assets/
+/Models/
 *.csv
 *.pyc
 *.DS_Store
